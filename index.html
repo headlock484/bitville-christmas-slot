@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bitville Christmas Slot Game</title>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Pacifico&family=Caveat:wght@700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .game-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #fff;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 24px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .instruction-text {
+            text-align: center;
+            margin-bottom: 20px;
+            font-family: 'Dancing Script', 'Pacifico', cursive;
+            font-size: clamp(20px, 4vw, 28px);
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            line-height: 1.4;
+        }
+
+        .instruction-text .word {
+            display: inline-block;
+            margin: 0 4px;
+        }
+
+        .instruction-text .word-spin {
+            color: #ff6b6b;
+        }
+
+        .instruction-text .word-times {
+            color: #4ecdc4;
+        }
+
+        .instruction-text .word-reveal {
+            color: #ffe66d;
+        }
+
+        .instruction-text .word-message {
+            color: #a8e6cf;
+        }
+
+        .slot-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .slot {
+            aspect-ratio: 1;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            overflow: hidden;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        .slot-reel {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 300%;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.1s linear;
+        }
+
+        .slot-reel-item {
+            width: 100%;
+            height: calc(300% / 9);
+            flex-shrink: 0;
+        }
+
+        .slot-reel-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .slot.spinning .slot-reel {
+            animation: scrollDown 0.1s linear infinite;
+        }
+
+        @keyframes scrollDown {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-33.333%); }
+        }
+
+        .slot-text {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            position: relative;
+            z-index: 2;
+            word-wrap: break-word;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        .snow-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 3;
+        }
+
+        .snowflake {
+            position: absolute;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 12px;
+            animation: fall linear infinite;
+            user-select: none;
+        }
+
+        @keyframes fall {
+            0% {
+                transform: translateY(-100%);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh);
+                opacity: 0;
+            }
+        }
+
+        .final-text-overlay {
+            position: absolute;
+            top: 30%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+            text-align: center;
+            font-family: 'Dancing Script', 'Pacifico', cursive;
+            font-size: clamp(28px, 6vw, 48px);
+            font-weight: bold;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.8), 0 0 20px rgba(255, 255, 255, 0.5);
+            white-space: nowrap;
+            pointer-events: none;
+        }
+
+        .final-text-overlay .word {
+            opacity: 0;
+            display: inline-block;
+            margin: 0 8px;
+            animation: fadeInWord 0.8s ease-in forwards;
+        }
+
+        .final-text-overlay .word-merry {
+            color: #ff6b6b;
+            animation-delay: 0.3s;
+        }
+
+        .final-text-overlay .word-christmas {
+            color: #4ecdc4;
+            animation-delay: 1.1s;
+        }
+
+        .final-text-overlay .word-bitville {
+            color: #ffe66d;
+            animation-delay: 1.9s;
+        }
+
+        @keyframes fadeInWord {
+            0% {
+                opacity: 0;
+                transform: translateY(20px) scale(0.8);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+
+        .controls {
+            text-align: center;
+        }
+
+        .spin-button {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 20px;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(238, 90, 111, 0.4);
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .spin-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(238, 90, 111, 0.6);
+        }
+
+        .spin-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .spin-counter {
+            color: #fff;
+            margin-top: 15px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .win-message {
+            color: #ffd700;
+            text-align: center;
+            margin-top: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            display: none;
+        }
+
+        .win-message.show {
+            display: block;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .start-again-button {
+            background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 20px;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(68, 160, 141, 0.4);
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .start-again-button.show {
+            display: inline-block;
+        }
+
+        .start-again-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(68, 160, 141, 0.6);
+        }
+
+        .copy-link-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 25px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s;
+            margin-top: 15px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .copy-link-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .copy-link-button.copied {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+
+        @media (max-width: 480px) {
+            .game-container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 20px;
+            }
+
+            .spin-button {
+                padding: 12px 30px;
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>🎄 Bitville Christmas Slot 🎄</h1>
+        <div class="instruction-text">
+            <span class="word word-spin">Spin</span>
+            <span class="word word-times">3 times</span>
+            <span class="word word-reveal">to reveal</span>
+            <span class="word word-message">the message...</span>
+        </div>
+        <div class="slot-grid">
+            <div class="slot" id="slot-0-0"><div class="slot-reel"></div></div>
+            <div class="slot" id="slot-0-1"><div class="slot-reel"></div></div>
+            <div class="slot" id="slot-0-2"><div class="slot-reel"></div></div>
+            <div class="slot" id="slot-1-0"><div class="slot-reel"></div></div>
+            <div class="slot" id="slot-1-1"><div class="slot-reel"></div></div>
+            <div class="slot" id="slot-1-2"><div class="slot-reel"></div></div>
+            <div class="slot" id="slot-2-0"><div class="slot-reel"></div></div>
+            <div class="slot" id="slot-2-1"><div class="slot-reel"></div></div>
+            <div class="slot" id="slot-2-2"><div class="slot-reel"></div></div>
+        </div>
+        <div class="controls">
+            <button class="spin-button" id="spinButton">Spin</button>
+            <div class="spin-counter" id="spinCounter">Spins remaining: 3</div>
+            <button class="copy-link-button" id="copyLinkButton" title="Copy game link">
+                📋 Copy Link
+            </button>
+            <button class="start-again-button" id="startAgainButton">Start Again</button>
+        </div>
+    </div>
+
+    <script>
+        const images = [
+            './image folder/istockphoto-1270144004-1024x1024.jpg',
+            './image folder/istockphoto-849223606-1024x1024.jpg',
+            './image folder/pexels-anntarazevich-6027786.jpg',
+            './image folder/pexels-bob-springbob54-91749-306864.jpg',
+            './image folder/pexels-cottonbro-6062983.jpg',
+            './image folder/pexels-est1307-250177.jpg',
+            './image folder/pexels-jill-wellington-1638660-3309802.jpg'
+        ];
+        
+        // The final "Merry Christmas" image that covers all 9 slots
+        const merryChristmasImage = './image folder/istockphoto-1270144004-1024x1024.jpg';
+
+        // Final spin result: same image for each row
+        const finalResult = [
+            0,  // Top row: first image
+            1,  // Middle row: second image
+            2   // Bottom row: third image
+        ];
+
+        let spinCount = 0;
+        const maxSpins = 3;
+        let isSpinning = false;
+
+        const spinButton = document.getElementById('spinButton');
+        const spinCounter = document.getElementById('spinCounter');
+        const startAgainButton = document.getElementById('startAgainButton');
+
+        // Build reel with multiple images for smooth scrolling
+        function buildReel(row, col) {
+            const slot = document.getElementById(`slot-${row}-${col}`);
+            const reel = slot.querySelector('.slot-reel');
+            if (!reel) return;
+            
+            reel.innerHTML = '';
+            
+            // Create 9 items (3 visible + 6 for smooth scrolling)
+            for (let i = 0; i < 9; i++) {
+                const item = document.createElement('div');
+                item.className = 'slot-reel-item';
+                const img = document.createElement('img');
+                const randomImage = images[Math.floor(Math.random() * images.length)];
+                img.src = randomImage;
+                item.appendChild(img);
+                reel.appendChild(item);
+            }
+            
+            // Set initial position to show first 3 items
+            reel.style.transform = 'translateY(0)';
+        }
+
+        // Initialize slots with reels
+        function initializeSlots() {
+            for (let row = 0; row < 3; row++) {
+                for (let col = 0; col < 3; col++) {
+                    buildReel(row, col);
+                }
+            }
+        }
+
+        // Set final image for a slot (for non-final spins)
+        function setSlotImage(row, col, imageIndex) {
+            const slot = document.getElementById(`slot-${row}-${col}`);
+            const reel = slot.querySelector('.slot-reel');
+            if (!reel) return;
+            
+            // Update all items in the reel to the same image
+            const items = reel.querySelectorAll('.slot-reel-item img');
+            items.forEach(img => {
+                img.src = images[imageIndex];
+            });
+        }
+
+        // Spin animation with smooth vertical scrolling
+        async function spin() {
+            if (isSpinning || spinCount >= maxSpins) return;
+
+            isSpinning = true;
+            spinButton.disabled = true;
+            spinCount++;
+
+            const isFinalSpin = spinCount === maxSpins;
+
+            // Rebuild reels with random images for smooth scrolling
+            for (let row = 0; row < 3; row++) {
+                for (let col = 0; col < 3; col++) {
+                    buildReel(row, col);
+                }
+            }
+
+            // Add spinning class to all slots to start vertical scrolling
+            const allSlots = document.querySelectorAll('.slot');
+            allSlots.forEach(slot => slot.classList.add('spinning'));
+
+            // Change images during spin for variety
+            const spinDuration = 3000; // 3 seconds
+            const changeInterval = 200; // Change images every 200ms
+            
+            const intervalId = setInterval(() => {
+                for (let row = 0; row < 3; row++) {
+                    for (let col = 0; col < 3; col++) {
+                        const slot = document.getElementById(`slot-${row}-${col}`);
+                        const reel = slot.querySelector('.slot-reel');
+                        if (reel) {
+                            const items = reel.querySelectorAll('.slot-reel-item img');
+                            items.forEach(img => {
+                                const randomImage = images[Math.floor(Math.random() * images.length)];
+                                img.src = randomImage;
+                            });
+                        }
+                    }
+                }
+            }, changeInterval);
+
+            // Wait for spin duration
+            await new Promise(resolve => setTimeout(resolve, spinDuration));
+
+            // Stop changing images
+            clearInterval(intervalId);
+
+            // Remove spinning class to stop animation
+            allSlots.forEach(slot => slot.classList.remove('spinning'));
+
+            // Set final result with smooth stop
+            if (isFinalSpin) {
+                // ONLY on 3rd spin: set middle row to "Merry Christmas" tiles horizontally, top/bottom rows random (but not matching)
+                console.log(`Final spin detected (spin ${spinCount} of ${maxSpins}) - setting "Merry Christmas" in middle row`);
+                await setFinalSpinResult();
+            } else {
+                console.log(`Regular spin ${spinCount} of ${maxSpins} - random images`);
+                // Regular spin: set random final images
+                for (let row = 0; row < 3; row++) {
+                    for (let col = 0; col < 3; col++) {
+                        const randomImageIndex = Math.floor(Math.random() * images.length);
+                        setSlotImage(row, col, randomImageIndex);
+                    }
+                }
+                // Scroll to show final images
+                await scrollToFinalPosition();
+            }
+
+            spinCounter.textContent = `Spins remaining: ${maxSpins - spinCount}`;
+
+            if (isFinalSpin) {
+                setTimeout(() => {
+                    startAgainButton.classList.add('show');
+                }, 500);
+                spinButton.disabled = true;
+                spinButton.textContent = 'Game Complete!';
+            } else {
+                spinButton.disabled = false;
+            }
+
+            isSpinning = false;
+        }
+
+        // Scroll to final position smoothly
+        async function scrollToFinalPosition() {
+            const allSlots = document.querySelectorAll('.slot');
+            const promises = [];
+            
+            allSlots.forEach(slot => {
+                const reel = slot.querySelector('.slot-reel');
+                if (reel) {
+                    // Scroll to show a random set of 3 consecutive items
+                    const randomOffset = Math.floor(Math.random() * 7) * (100 / 3);
+                    reel.style.transition = 'transform 0.5s ease-out';
+                    reel.style.transform = `translateY(-${randomOffset}%)`;
+                    promises.push(new Promise(resolve => setTimeout(resolve, 500)));
+                }
+            });
+            
+            await Promise.all(promises);
+        }
+
+        // Set final result for final spin - middle row shows 3 matching "Merry Christmas" images horizontally
+        async function setFinalSpinResult() {
+            console.log('=== Showing "Merry Christmas" image across all 9 slots ===');
+            
+            // Hide the slot grid
+            const slotGrid = document.querySelector('.slot-grid');
+            if (slotGrid) {
+                slotGrid.style.display = 'none';
+            }
+            
+            // Create a container for the full-size image
+            const gameContainer = document.querySelector('.game-container');
+            const fullImageContainer = document.createElement('div');
+            fullImageContainer.id = 'fullImageContainer';
+            fullImageContainer.style.width = '100%';
+            fullImageContainer.style.aspectRatio = '1';
+            fullImageContainer.style.borderRadius = '15px';
+            fullImageContainer.style.overflow = 'hidden';
+            fullImageContainer.style.position = 'relative';
+            fullImageContainer.style.marginBottom = '30px';
+            fullImageContainer.style.border = '3px solid rgba(255, 255, 255, 0.3)';
+            fullImageContainer.style.boxShadow = 'inset 0 2px 10px rgba(0, 0, 0, 0.3)';
+            
+            // Create the image
+            const fullImage = document.createElement('img');
+            fullImage.src = merryChristmasImage;
+            fullImage.style.width = '100%';
+            fullImage.style.height = '100%';
+            fullImage.style.objectFit = 'cover';
+            fullImage.style.display = 'block';
+            fullImageContainer.appendChild(fullImage);
+            
+            // Add snow container over the image
+            const snowContainer = document.createElement('div');
+            snowContainer.className = 'snow-container';
+            snowContainer.style.position = 'absolute';
+            snowContainer.style.top = '0';
+            snowContainer.style.left = '0';
+            snowContainer.style.width = '100%';
+            snowContainer.style.height = '100%';
+            fullImageContainer.appendChild(snowContainer);
+            startSnow(snowContainer);
+            
+            // Add multicolored cursive text overlay
+            const textOverlay = document.createElement('div');
+            textOverlay.className = 'final-text-overlay';
+            
+            const wordMerry = document.createElement('span');
+            wordMerry.className = 'word word-merry';
+            wordMerry.textContent = 'Merry';
+            
+            const wordChristmas = document.createElement('span');
+            wordChristmas.className = 'word word-christmas';
+            wordChristmas.textContent = 'Christmas';
+            
+            const wordBitville = document.createElement('span');
+            wordBitville.className = 'word word-bitville';
+            wordBitville.textContent = 'Bitville';
+            
+            textOverlay.appendChild(wordMerry);
+            textOverlay.appendChild(wordChristmas);
+            textOverlay.appendChild(wordBitville);
+            
+            fullImageContainer.appendChild(textOverlay);
+            
+            // Insert the full image container before the controls
+            const controls = document.querySelector('.controls');
+            if (controls && gameContainer) {
+                gameContainer.insertBefore(fullImageContainer, controls);
+            }
+            
+            console.log('Full "Merry Christmas" image displayed');
+            await new Promise(resolve => setTimeout(resolve, 100));
+        }
+
+
+        // Create falling snow effect
+        function startSnow(container) {
+            const snowflakes = ['❄', '❅', '❆'];
+            
+            function createSnowflake() {
+                const snowflake = document.createElement('div');
+                snowflake.className = 'snowflake';
+                snowflake.textContent = snowflakes[Math.floor(Math.random() * snowflakes.length)];
+                snowflake.style.left = Math.random() * 100 + '%';
+                snowflake.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                snowflake.style.animationDelay = Math.random() * 2 + 's';
+                snowflake.style.opacity = Math.random() * 0.5 + 0.3;
+                container.appendChild(snowflake);
+                
+                // Remove snowflake after animation
+                setTimeout(() => {
+                    if (snowflake.parentNode) {
+                        snowflake.remove();
+                    }
+                }, 5000);
+            }
+            
+            // Create snowflakes periodically
+            const snowInterval = setInterval(() => {
+                if (container.parentNode) {
+                    createSnowflake();
+                } else {
+                    clearInterval(snowInterval);
+                }
+            }, 300);
+        }
+
+        // Start again function
+        function startAgain() {
+            spinCount = 0;
+            isSpinning = false;
+            spinButton.disabled = false;
+            spinButton.textContent = 'Spin';
+            spinCounter.textContent = `Spins remaining: ${maxSpins}`;
+            startAgainButton.classList.remove('show');
+            
+            // Remove the full image container if it exists
+            const fullImageContainer = document.getElementById('fullImageContainer');
+            if (fullImageContainer) {
+                fullImageContainer.remove();
+            }
+            
+            // Show the slot grid again
+            const slotGrid = document.querySelector('.slot-grid');
+            if (slotGrid) {
+                slotGrid.style.display = 'grid';
+            }
+            
+            // Clear all slots and restore reels
+            for (let row = 0; row < 3; row++) {
+                for (let col = 0; col < 3; col++) {
+                    const slot = document.getElementById(`slot-${row}-${col}`);
+                    slot.innerHTML = '<div class="slot-reel"></div>';
+                    slot.classList.remove('spinning', 'stop');
+                }
+            }
+            
+            initializeSlots();
+        }
+
+        spinButton.addEventListener('click', spin);
+        startAgainButton.addEventListener('click', startAgain);
+
+        // Initialize the game
+        initializeSlots();
+    </script>
+</body>
+</html>
